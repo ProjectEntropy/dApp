@@ -1,12 +1,13 @@
 {
-  "name": "truffle3-frontend-example",
+  "name": "entropy-frontend",
   "version": "0.0.1",
-  "description": "Frontend example using truffle v3",
+  "description": "Experimental DAO Interface dApp",
   "scripts": {
     "lint": "./node_modules/.bin/eslint ./",
-    "build": "./node_modules/.bin/webpack"
+    "build": "./node_modules/.bin/webpack",
+    "watch": "webpack --progress --colors --watch"
   },
-  "author": "Douglas von Kohorn",
+  "author": "Joran Kikke",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.22.2",
@@ -29,5 +30,14 @@
     "uglifyjs-webpack-plugin": "^0.1.2",
     "web3": "^0.18.2",
     "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "axios": "^0.16.1",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "react": "^15.5.4",
+    "react-bootstrap": "^0.30.8",
+    "react-dom": "^15.5.4"
   }
 }
