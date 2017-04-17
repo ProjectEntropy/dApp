@@ -32,9 +32,7 @@ module.exports = {
       },
       { test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/ },
       { test: /\.jsx$/, loader: 'babel-loader', exclude: /node_modules/ },
-
       { test: /\.sol/, loader: 'truffle-solidity' },
-
       {test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff'},
       {test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/octet-stream'},
       {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file'},
@@ -45,6 +43,15 @@ module.exports = {
                 path.resolve(__dirname, "not_exist_path")
             ],
             loader: "style!css"
+      },
+      { test: /\.less$/,
+          use: [{
+              loader: "style-loader" // creates style nodes from JS strings
+          }, {
+              loader: "css-loader" // translates CSS into CommonJS
+          }, {
+              loader: "less-loader" // compiles Less to CSS
+          }]
       }
     ]
   }
