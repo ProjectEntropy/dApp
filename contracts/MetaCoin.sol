@@ -23,7 +23,7 @@ contract MetaCoin {
 		Transfer(msg.sender, receiver, amount);
 		return true;
 	}
-
+  
 	function getBalanceInEth(address addr) returns(uint){
 		return ConvertLib.convert(getBalance(addr),2);
 	}

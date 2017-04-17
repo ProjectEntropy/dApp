@@ -1,0 +1,37 @@
+.entropy_logo
+{
+  margin-top: 9px;
+}
+
+.navbar-default {
+  border-color: rgba(255,255,255,0.3);
+  background-color: transparent;
+}
+
+.navbar-default .navbar-nav > li > a
+{
+  color: white;
+  font-weight: bold;
+}
+
+.panel-body
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body{
+  background-image: url("//bitboatassets.s3.amazonaws.com/bitboat/assets/cat_from_above-62983c38ea2bf422f52a411ff46d3756689ae2f5348f5026819701746d170ffb.jpg");
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.panel-heading h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: normal;
+  width: 75%;
+}
