@@ -22,10 +22,12 @@ const ActionForm = ({addaction}) => {
       addaction(input.value);
       input.value = '';
     }}>
-      <input className="form-control col-md-12" ref={node => {
+      <input className="form-control col-md-12" placeholder="description" ref={node => {
         input = node;
       }}/>
       <br/>
+      <button type="submit" className="btn btn-default form-control">Create</button>
+
     </form>
   );
 };
@@ -123,7 +125,6 @@ export default class App extends React.Component {
       // Convert bignums to strings
       data = bigNumberToString(data)
 
-
       actions.push(data)
       this.setState({ actions: actions })
     };
@@ -136,7 +137,6 @@ export default class App extends React.Component {
       new_actions.watch( function(error, result) {
         // Whenever an action was seen
         // (Window Context)
-
         if (error == null) {
           console.log("Saw action!")
           console.log(result.event)
@@ -145,10 +145,7 @@ export default class App extends React.Component {
             self.new_action(result.args)
         }
       })
-
     })
-
-    // state.contract.newAction( 10000, "this is a test", { from: web3.eth.accounts[0] })
   }
 
   // Add action handler
@@ -158,11 +155,8 @@ export default class App extends React.Component {
       description: val,
       id: window.id++
     }
-    // Update data
-    axios.post(this.apiUrl, action).then((res) => {
-      this.state.data.push(res.data);
-      this.setState({data: this.state.data});
-    });
+
+    this.state.contract.newAction( 10000, action.description, { from: this.state.web3.eth.accounts[0], gas: 200000 })
   }
 
   // Handle remove
@@ -184,7 +178,6 @@ export default class App extends React.Component {
     return (
       <div>
         <Title count={this.state.actions.length} ethAddress={this.state.ethAddress}/>
-        <ActionForm addaction={this.addaction.bind(this)}/>
 
         <div className="col-sm-4">
           <div className="panel panel-default">
@@ -195,6 +188,9 @@ export default class App extends React.Component {
               <div className="clearfix"/></div>
             <div className="panel-body">
               <ActionList actions={this.state.actions} />
+
+              <ActionForm addaction={this.addaction.bind(this)}/>
+
             </div>
           </div>
         </div>
