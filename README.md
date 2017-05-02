@@ -1,4 +1,26 @@
-# truffle3-frontend-example
+# Entropy dApp
+
+var entropy;
+MetaCoin.deployed().then(function(instance) { entropy = instance })
+
+### Get ABI
+
+JSON.stringify(entropy.abi)
+
+
+    parity --chain dev
+
+
+### New Action
+
+entropy.newAction( 0, "Buy Potatoes", { from: web3.eth.accounts[0] })
+
+
+## Spin up
+
+'npm run watch #continuously build the webpack bundle of javascript'
+'truffle serve #setup webserver for the bundle + continuously compile Solidity'
+
 
 ## In order to build and run the frontend code *LOCALLY*, run
 1. `yarn install` or `npm install` depending on your preference
