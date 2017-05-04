@@ -11,31 +11,6 @@ contract MetaCoin {
 	mapping (address => uint) balances;
 
   Action[] public actions;
-
-/*
-  struct Proposal {
-    string name;
-    address destination;
-    address proxy;
-    uint value;
-    bytes32 hash;
-    bool executed;
-    uint debatePeriod;
-    uint created;
-    address from;
-    mapping(uint => uint) positions;
-    mapping(address => Vote) votes;
-    address[] voters;
-  }
-
-  struct Vote {
-    uint position;
-    uint weight;
-    uint created;
-  }
-
-  Proposal[] public proposals;*/
-
   uint public actions_count;
 
   struct Action {

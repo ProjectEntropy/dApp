@@ -1,5 +1,6 @@
 // React junk
 import React from 'react';
+import { BrowserRouter as Router, Link } from 'react-router-dom'
 import axios from 'axios'
 
 // Ethereum stuff
@@ -60,9 +61,9 @@ const Action = ({action, remove}) => {
             {action.eth / 100000000} eth
           </span>
           }
-          <a className="thread-title" href="actions//5mq2ZtBBpF4YjeiS9">
+          <Link className="thread-title" to={ `/actions/${action.actionID}` }>
             {action.description}
-          </a>
+          </Link>
           { action.tags.split(',').map((tag) =>
             <span key={tag} className="badge">{tag}</span>
           )}
@@ -88,12 +89,13 @@ const ActionList = ({actions, remove}) => {
   );
 }
 
-const Title = ({count, addr}) => {
+const Title = ({count, addr, balance}) => {
   return (
     <div>
       <div>
         <h1>Actions ({count})</h1>
-        <span>Connected to: {addr}</span>
+        <h1>Balance: {balance}</h1>
+        <p>Connected to: {addr}</p>
       </div>
     </div>
   );
@@ -114,10 +116,7 @@ export default class App extends React.Component {
     }
     this.ethAddress = ""
 
-    // Load Ethereum jazz
-    // var from = Web3.eth.coinbase;
-    // Web3.eth.defaultAccount = from;
-
+    // Load Ethereum jazz;
     let provider = new Web3.providers.HttpProvider(`http://${TESTRPC_HOST}:${TESTRPC_PORT}`)
 
     this.web3 = new Web3()
@@ -128,11 +127,11 @@ export default class App extends React.Component {
       this.state.ethAddress = instance.address
       this.state.contract = instance
       this.state.web3 = this.web3
+      // this.state.balance = this.web3.eth.getBalance(this.state.contract.address)
     })
   }
   // Lifecycle method
   componentDidMount() {
-
     // mount to global window so Web3 events can get a hook back into the React App
     window.new_action = (data) => {
       // Clean up data
@@ -176,9 +175,6 @@ export default class App extends React.Component {
         // Whenever an action was seen
         // (Window Context)
         if (error == null) {
-          console.log("Saw action!")
-          console.log(result.event)
-
           if(result.event == "ActionAdded")
             self.new_action(result.args)
         }
@@ -196,7 +192,14 @@ export default class App extends React.Component {
       id: window.id++
     }
 
-    this.state.contract.newAction( action.eth, action.description, action.tags, { from: this.state.web3.eth.accounts[0], gas: 200000 })
+    this.state.contract.newAction(
+      action.eth,
+      action.description,
+      action.tags,
+      {
+        from: this.state.web3.eth.accounts[0],
+        gas: 200000
+      })
   }
 
   // Handle remove
@@ -216,6 +219,7 @@ export default class App extends React.Component {
   render() {
     // Render JSX
     return (
+      <Router>
       <div>
         <div className="col-sm-4">
           <div className="panel panel-default">
@@ -225,7 +229,11 @@ export default class App extends React.Component {
               </h3>
             </div>
             <div className="panel-body">
-              <Title count={this.state.actions.length} ethAddress={this.state.ethAddress}/>
+              <Title
+                count={this.state.actions.length}
+                ethAddress={this.state.ethAddress}
+                balance={this.state.balance}
+              />
             </div>
           </div>
 
@@ -271,6 +279,7 @@ export default class App extends React.Component {
           </div>
         </div>
       </div>
+      </Router>
     );
   }
 }
