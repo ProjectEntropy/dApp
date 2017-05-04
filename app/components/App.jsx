@@ -15,15 +15,25 @@ const TESTRPC_PORT = '8545'
 const ActionForm = ({addaction}) => {
   // Input Tracker
   let input;
+  let eth;
+  let tags;
 
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
-      addaction(input.value);
+      addaction(input.value, eth.value, tags.value);
       input.value = '';
+      eth.value = '';
+      tags.value = '';
     }}>
       <input className="form-control col-md-12" placeholder="description" ref={node => {
         input = node;
+      }}/>
+      <input className="form-control col-md-12" placeholder="Eth amount" ref={node => {
+        eth = node;
+      }}/>
+      <input className="form-control col-md-12" placeholder="tags" ref={node => {
+        tags = node;
       }}/>
       <br/>
       <button type="submit" className="btn btn-default form-control">Create</button>
@@ -36,22 +46,28 @@ const Action = ({action, remove}) => {
   // Each action
   return (
     <tr>
-      <td>
-        <div className="vote"><i className="fa fa-chevron-up"/>
-          <div className="score"></div>
-          <i className="fa fa-chevron-down"/></div>
-      </td>
-      <td>
-        <div className="info-container"><a className="thread-title"/>
-          <h4><a className="thread-title"/>
-            <a href="actions//5mq2ZtBBpF4YjeiS9">
-              {action.description}
-            </a>
-            <span className="badge">event</span>
-          </h4>
-          <h6 className="thread-info"><p/>
-            <p/></h6>
+      <td className>
+        <div className="vote text-center">
+          <i className="fa fa-chevron-up"/>
+          <div className="score">{action.numberOfVotes}</div>
+          <i className="fa fa-chevron-down"/>
         </div>
+      </td>
+      <td className="vertical-align info-container">
+        <h4 className="full-width">
+          {action.eth != 0 &&
+          <span className="pull-right text-muted font-smaller">
+            {action.eth / 100000000} eth
+          </span>
+          }
+          <a className="thread-title" href="actions//5mq2ZtBBpF4YjeiS9">
+            {action.description}
+          </a>
+          { action.tags.split(',').map((tag) =>
+            <span key={tag} className="badge">{tag}</span>
+          )}
+
+        </h4>
       </td>
     </tr>
   );
@@ -63,7 +79,7 @@ const ActionList = ({actions, remove}) => {
     return (<Action action={action} key={action.actionID} remove={remove}/>)
   });
   return (
-    <table>
+    <table className="full-width table table-striped">
       <tbody>
         {actionNode}
       </tbody>
@@ -77,7 +93,7 @@ const Title = ({count, addr}) => {
     <div>
       <div>
         <h1>Actions ({count})</h1>
-        <h3>Connected to: {addr}</h3>
+        <span>Connected to: {addr}</span>
       </div>
     </div>
   );
@@ -96,7 +112,6 @@ export default class App extends React.Component {
       contract: null,
       web3: null
     }
-    this.apiUrl = 'http://58f1797bf736cd1200044f62.mockapi.io/Action'
     this.ethAddress = ""
 
     // Load Ethereum jazz
@@ -120,13 +135,36 @@ export default class App extends React.Component {
 
     // mount to global window so Web3 events can get a hook back into the React App
     window.new_action = (data) => {
-      var actions = this.state.actions.slice()
+      // Clean up data
+      var data = bigNumberToString(data)
 
-      // Convert bignums to strings
-      data = bigNumberToString(data)
+      this.meta.deployed().then((instance) =>
+      {
+        var action_id = data.actionID
 
-      actions.push(data)
-      this.setState({ actions: actions })
+        // Lookup more details about this Action
+        instance.actions(action_id).then( (action_data) => {
+          var actions = this.state.actions.slice()
+          var action_data = bigNumberToString(action_data)
+          console.log(action_data)
+
+          var action = {
+            actionID: parseInt(action_id),
+            eth: action_data[0],
+            description: action_data[1],
+            tags: action_data[2],
+            votingDeadline: action_data[3],
+            done: action_data[4],
+            bool: action_data[5],
+            numberOfVotes: action_data[6],
+            actionHash: action_data[7]
+          }
+
+          // Set React state
+          actions.push(action)
+          this.setState({ actions: actions })
+        })
+      })
     };
 
     // fetch actions from Ethereum
@@ -149,14 +187,16 @@ export default class App extends React.Component {
   }
 
   // Add action handler
-  addaction(val) {
+  addaction(val, eth, tags) {
     // Assemble data
     const action = {
       description: val,
+      eth: eth,
+      tags: tags,
       id: window.id++
     }
 
-    this.state.contract.newAction( 10000, action.description, { from: this.state.web3.eth.accounts[0], gas: 200000 })
+    this.state.contract.newAction( action.eth, action.description, action.tags, { from: this.state.web3.eth.accounts[0], gas: 200000 })
   }
 
   // Handle remove
@@ -177,46 +217,56 @@ export default class App extends React.Component {
     // Render JSX
     return (
       <div>
-        <Title count={this.state.actions.length} ethAddress={this.state.ethAddress}/>
+        <div className="col-sm-4">
+          <div className="panel panel-default">
+            <div className="panel-heading">
+              <h3 className="panel-title">
+                Entropy Dashboard
+              </h3>
+            </div>
+            <div className="panel-body">
+              <Title count={this.state.actions.length} ethAddress={this.state.ethAddress}/>
+            </div>
+          </div>
+
+
+          <div className="panel panel-default">
+            <div className="panel-heading">
+              <h3 className="panel-title">
+                <span className="fa fa-check-square-o fa-2x text-muted"/>
+              </h3>
+              <div className="clearfix"/></div>
+            <div className="panel-body">
+
+            </div>
+          </div>
+        </div>
 
         <div className="col-sm-4">
           <div className="panel panel-default">
             <div className="panel-heading">
-              <h3 className="panel-title pull-left"><div className="fa fa-gear"/>
-                <a href="/actions/Now">Done</a>
+              <h3 className="panel-title pull-left">
+                <div className="fa fa-gear fa-2x text-muted"/>
               </h3>
+              <div className="clearfix"/></div>
+            <div className="panel-body">
+              <ActionList actions={this.state.data} />
+            </div>
+          </div>
+        </div>
+
+        <div className="col-sm-4">
+          <div className="panel panel-default">
+            <div className="panel-heading">
+              <h1 className="panel-title pull-left">
+                <div className="fa fa-lightbulb-o fa-2x text-muted"/>
+
+              </h1>
               <div className="clearfix"/></div>
             <div className="panel-body">
               <ActionList actions={this.state.actions} />
 
               <ActionForm addaction={this.addaction.bind(this)}/>
-
-            </div>
-          </div>
-        </div>
-
-        <div className="col-sm-4">
-          <div className="panel panel-default">
-            <div className="panel-heading">
-              <h3 className="panel-title pull-left"><div className="fa fa-gear"/>
-                <a href="/actions/Now">Now</a>
-              </h3>
-              <div className="clearfix"/></div>
-            <div className="panel-body">
-              <ActionList actions={this.state.data} />
-            </div>
-          </div>
-        </div>
-
-        <div className="col-sm-4">
-          <div className="panel panel-default">
-            <div className="panel-heading">
-              <h3 className="panel-title pull-left"><div className="fa fa-gear"/>
-                <a href="/actions/Now">Soon</a>
-              </h3>
-              <div className="clearfix"/></div>
-            <div className="panel-body">
-              <ActionList actions={this.state.data} />
             </div>
           </div>
         </div>

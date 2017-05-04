@@ -41,6 +41,7 @@ contract MetaCoin {
   struct Action {
     uint amount;
     string description;
+    string tags;
     uint votingDeadline;
     bool done;
     bool actionPassed;
@@ -56,7 +57,8 @@ contract MetaCoin {
 
   function newAction(
     uint _etherAmount,      // Amount of Ether, in wei, to unlock (optional)
-    string _description     // The idea, task or destination
+    string _description,    // The idea, task or destination
+    string _tags            // What does this relate to
   )
   returns (uint actionID)
   {
@@ -64,12 +66,14 @@ contract MetaCoin {
     Action memory a;
     a.amount = _etherAmount;
     a.description = _description;
+    a.tags = _tags;
     a.actionHash = sha3(_etherAmount, _description);
     a.votingDeadline = now + 5 days;
     a.done = false;
     a.actionPassed = false;
     a.numberOfVotes = 0;
     actions.push(a);
+
     ActionAdded(actionID, _etherAmount, _description);
     actions_count = actionID + 1;
     return actionID;
