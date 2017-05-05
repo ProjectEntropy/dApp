@@ -17,9 +17,13 @@ entropy.newAction( 0, "Buy Potatoes", { from: web3.eth.accounts[0] })
 
 
 ## Spin up
-
-'npm run watch #continuously build the webpack bundle of javascript'
+cd into the dApp directory
+'npm install'
+'npm install truffle -g #everybody gets truffle'
+'truffle migrate #deploys smart contracts onto ethereum blockchain'
 'truffle serve #setup webserver for the bundle + continuously compile Solidity'
+'npm run watch #continuously build the webpack bundle of javascript'
+
 
 
 ## In order to build and run the frontend code *LOCALLY*, run
