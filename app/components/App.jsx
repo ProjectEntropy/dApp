@@ -3,6 +3,8 @@ import React from 'react';
 import { BrowserRouter as Router, Link } from 'react-router-dom'
 import axios from 'axios'
 
+import TimeAgo from 'react-timeago'
+
 // Ethereum stuff
 import {default as Web3} from 'web3'
 import {default as contract} from 'truffle-contract'
@@ -47,7 +49,7 @@ const Action = ({action, remove}) => {
   // Each action
   return (
     <tr>
-      <td className>
+      <td>
         <div className="vote text-center">
           <i className="fa fa-chevron-up"/>
           <div className="score">{action.numberOfVotes}</div>
@@ -67,8 +69,10 @@ const Action = ({action, remove}) => {
           { action.tags.split(',').map((tag) =>
             <span key={tag} className="badge">{tag}</span>
           )}
-
         </h4>
+        <br/>
+        <TimeAgo date={action.votingDeadline}>
+        </TimeAgo>
       </td>
     </tr>
   );
@@ -147,12 +151,13 @@ export default class App extends React.Component {
           var action_data = bigNumberToString(action_data)
           console.log(action_data)
 
+
           var action = {
             actionID: parseInt(action_id),
             eth: action_data[0],
             description: action_data[1],
             tags: action_data[2],
-            votingDeadline: action_data[3],
+            votingDeadline: new Date(parseInt(action_data[3]) * 1000),
             done: action_data[4],
             bool: action_data[5],
             numberOfVotes: action_data[6],
