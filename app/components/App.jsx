@@ -138,7 +138,7 @@ export default class App extends React.Component {
   // Lifecycle method
   componentDidMount() {
     // mount to global window so Web3 events can get a hook back into the React App
-    window.new_action = (data) => {
+    window.update_action = (data) => {
       // Clean up data
       var data = bigNumberToString(data)
 
@@ -167,7 +167,31 @@ export default class App extends React.Component {
           }
 
           // Set React state
-          actions.push(action)
+
+          // If we already track this action
+          if(actions.length > 0)
+          {
+            for (var i in actions) {
+              if(actions[i].actionID == action_id)
+              {
+                // Update this action
+                console.log("updating action")
+                actions[i] = action
+              }
+              else
+              {
+                // otherwise create
+                console.log("creating action")
+                actions.push(action)
+              }
+            }
+          }
+          else
+          {
+            actions.push(action)
+          }
+
+
           this.setState({ actions: actions })
         })
       })
@@ -183,7 +207,9 @@ export default class App extends React.Component {
         // (Window Context)
         if (error == null) {
           if(result.event == "ActionAdded")
-            self.new_action(result.args)
+            self.update_action(result.args)
+          if(result.event == "Voted")
+            self.update_action(result.args)
         }
       })
     })
@@ -289,4 +315,43 @@ export default class App extends React.Component {
       </Router>
     );
   }
+}
+
+if (!Array.prototype.indexOf) {
+
+  Array.prototype.indexOf = function(searchElement/*, fromIndex */) {
+
+    "use strict";
+
+    if (this === void 0 || this === null)
+      throw new TypeError();
+
+    var t = Object(this);
+    var len = t.length >>> 0;
+    if (len === 0)
+      return -1;
+
+    var n = 0;
+    if (arguments.length > 0) {
+      n = Number(arguments[1]);
+      if (n !== n)
+        n = 0;
+      else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0))
+        n = (n > 0 || -1) * Math.floor(Math.abs(n));
+      }
+
+    if (n >= len)
+      return -1;
+
+    var k = n >= 0
+      ? n
+      : Math.max(len - Math.abs(n), 0);
+
+    for (; k < len; k++) {
+      if (k in t && t[k] === searchElement)
+        return k;
+      }
+    return -1;
+  };
+
 }

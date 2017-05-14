@@ -76,6 +76,9 @@ contract Entropy {
       actions[index].actionPassed,
       actions[index].numberOfVotes,
       actions[index].votingTally
+
+
+
     );
   }
 
@@ -87,6 +90,13 @@ contract Entropy {
   returns (uint voteID)
   {
     Action action = actions[actionId];
+
+    // if this is a dangerous action, and the citizen is not yet trusted, then throw
+    /*if (action.dangerous? && ! trusted_citizens[msg.sender])
+    {
+      throw
+    }*/
+
 
     // Check to make sure this person has not already voted
     if (action.voted[msg.sender] == true) throw;
@@ -114,7 +124,7 @@ contract Entropy {
 
   event ActionAdded(uint actionID, uint amount, string description);
   // Vote
-  event Voted(uint actionId, bool in_favour, address citizen);
+  event Voted(uint actionID, bool in_favour, address citizen);
 
   // A new guardian has been elected
   event NewGuardian(address indexed _guardian, address indexed _creator);
