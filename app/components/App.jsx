@@ -52,7 +52,7 @@ const Action = ({action, remove}) => {
       <td>
         <div className="vote text-center">
           <i className="fa fa-chevron-up"/>
-          <div className="score">{action.numberOfVotes}</div>
+          <div className="score">{action.votingTally}</div>
           <i className="fa fa-chevron-down"/>
         </div>
       </td>
@@ -71,6 +71,7 @@ const Action = ({action, remove}) => {
           )}
         </h4>
         <br/>
+        { action.numberOfVotes }
         <TimeAgo date={action.votingDeadline}>
         </TimeAgo>
       </td>
@@ -161,7 +162,8 @@ export default class App extends React.Component {
             done: action_data[4],
             bool: action_data[5],
             numberOfVotes: action_data[6],
-            actionHash: action_data[7]
+            votingTally: action_data[7],
+            actionHash: action_data[8]
           }
 
           // Set React state

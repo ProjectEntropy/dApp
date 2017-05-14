@@ -21,7 +21,8 @@ contract Entropy {
     bool done;
     bool actionPassed;
     uint numberOfVotes;
-    bytes32 actionHash;
+    int votingTally;
+    /*bytes32 actionHash;*/
     mapping (address => bool) voted;
   }
 
@@ -42,11 +43,12 @@ contract Entropy {
     a.amount = _etherAmount;
     a.description = _description;
     a.tags = _tags;
-    a.actionHash = sha3(_etherAmount, _description);
+    /*a.actionHash = sha3(_etherAmount, _description);*/
     a.votingDeadline = now + 5 days;
     a.done = false;
     a.actionPassed = false;
     a.numberOfVotes = 0;
+    a.votingTally = 0;
     actions.push(a);
 
     ActionAdded(actionID, _etherAmount, _description);
@@ -64,7 +66,7 @@ contract Entropy {
     bool,     // done;
     bool,     // actionPassed;
     uint,     // numberOfVotes;
-    bytes32   // actionHash;
+    int      // votingTally;
   ){
     return (
       actions[index].amount,
@@ -73,10 +75,41 @@ contract Entropy {
       actions[index].done,
       actions[index].actionPassed,
       actions[index].numberOfVotes,
-      actions[index].actionHash
+      actions[index].votingTally
     );
   }
 
+  /**
+   * Voting
+   */
+  function vote(uint actionId, bool in_favour)
+  /*onlyTrusted*/
+  returns (uint voteID)
+  {
+    Action action = actions[actionId];
+
+    // Check to make sure this person has not already voted
+    if (action.voted[msg.sender] == true) throw;
+
+    /*action.votes[voteID] = Vote({inSupport: in_favour, citizen: msg.sender});*/
+    int vote = 0;
+    if(in_favour)
+    {
+      vote = 1;
+    }
+    else
+    {
+      vote = -1;
+    }
+    action.votingTally += vote;
+    action.voted[msg.sender] = true;
+    action.numberOfVotes = action.numberOfVotes + 1;
+    Voted(actionId, in_favour, msg.sender);
+  }
+
+  /**
+   * Events
+   */
 	event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
   event ActionAdded(uint actionID, uint amount, string description);
@@ -94,24 +127,4 @@ contract Entropy {
 
   // Safety Limit has been increased
   event SafetyLimitChange(address indexed _guardian, uint indexed limit);
-
-	function Entropy() {
-		balances[tx.origin] = 10000;
-	}
-
-	function sendCoin(address receiver, uint amount) returns(bool sufficient) {
-		if (balances[msg.sender] < amount) return false;
-		balances[msg.sender] -= amount;
-		balances[receiver] += amount;
-		Transfer(msg.sender, receiver, amount);
-		return true;
-	}
-
-	function getBalanceInEth(address addr) returns(uint){
-		return ConvertLib.convert(getBalance(addr),2);
-	}
-
-	function getBalance(address addr) returns(uint) {
-		return balances[addr];
-	}
 }
