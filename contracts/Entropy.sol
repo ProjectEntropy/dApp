@@ -7,7 +7,7 @@ import "./ConvertLib.sol";
 // coin/token contracts. If you want to create a standards-compliant
 // token, see: https://github.com/ConsenSys/Tokens. Cheers!
 
-contract MetaCoin {
+contract Entropy {
 	mapping (address => uint) balances;
 
   Action[] public actions;
@@ -95,7 +95,7 @@ contract MetaCoin {
   // Safety Limit has been increased
   event SafetyLimitChange(address indexed _guardian, uint indexed limit);
 
-	function MetaCoin() {
+	function Entropy() {
 		balances[tx.origin] = 10000;
 	}
 

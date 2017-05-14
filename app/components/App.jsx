@@ -8,7 +8,7 @@ import TimeAgo from 'react-timeago'
 // Ethereum stuff
 import {default as Web3} from 'web3'
 import {default as contract} from 'truffle-contract'
-import MetaCoinContract from '../../build/contracts/MetaCoin.json'
+import EntropyContract from '../../build/contracts/Entropy.json'
 
 import bigNumberToString from 'bignumber-to-string'
 
@@ -125,7 +125,7 @@ export default class App extends React.Component {
 
     this.web3 = new Web3()
     this.web3.setProvider(provider)
-    this.meta = contract(MetaCoinContract)
+    this.meta = contract(EntropyContract)
     this.meta.setProvider(provider)
     this.meta.deployed().then((instance) => {
       this.state.ethAddress = instance.address

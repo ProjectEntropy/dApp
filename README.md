@@ -1,7 +1,7 @@
 # Entropy dApp
 
 var entropy;
-MetaCoin.deployed().then(function(instance) { entropy = instance })
+Entropy.deployed().then(function(instance) { entropy = instance })
 
 ### Get ABI
 
