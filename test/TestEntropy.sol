@@ -7,19 +7,19 @@ import "../contracts/Entropy.sol";
 contract TestEntropy {
 
   function testInitialBalanceUsingDeployedContract() {
-    Entropy meta = Entropy(DeployedAddresses.Entropy());
+    Entropy entropy = Entropy(DeployedAddresses.Entropy());
 
     uint expected = 10000;
 
-    Assert.equal(meta.getBalance(tx.origin), expected, "Owner should have 10000 Entropy initially");
+    Assert.equal(entropy.getBalance(tx.origin), expected, "Owner should have 10000 Entropy initially");
   }
 
   function testInitialBalanceWithNewEntropy() {
-    Entropy meta = new Entropy();
+    Entropy entropy = new Entropy();
 
     uint expected = 10000;
 
-    Assert.equal(meta.getBalance(tx.origin), expected, "Owner should have 10000 Entropy initially");
+    Assert.equal(entropy.getBalance(tx.origin), expected, "Owner should have 10000 Entropy initially");
   }
 
 }
