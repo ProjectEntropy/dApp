@@ -45,22 +45,26 @@ const ActionForm = ({addaction}) => {
   );
 };
 
-const Action = ({action, remove}) => {
+const Action = ({action, remove, handleVote}) => {
   // Each action
   return (
     <tr>
       <td>
         <div className="vote text-center">
-          <i className="fa fa-chevron-up"/>
+          <a onClick={() => this.handleVote(action.actionID, true)}>
+            <i className="fa fa-chevron-up" />
+          </a>
           <div className="score">{action.votingTally}</div>
-          <i className="fa fa-chevron-down"/>
+          <a onClick={() => this.handleVote(action.actionID, false)}>
+            <i className="fa fa-chevron-down" />
+          </a>
         </div>
       </td>
       <td className="vertical-align info-container">
         <h4 className="full-width">
           {action.eth != 0 &&
           <span className="pull-right text-muted font-smaller">
-            {action.eth / 100000000} eth
+            {action.eth} eth
           </span>
           }
           <Link className="thread-title" to={ `/actions/${action.actionID}` }>
@@ -79,13 +83,13 @@ const Action = ({action, remove}) => {
   );
 }
 
-const ActionList = ({actions, remove}) => {
+const ActionList = ({actions, remove, handleVote}) => {
   // Map through the actions
   const actionNode = actions.map((action) => {
-    return (<Action action={action} key={action.actionID} remove={remove}/>)
+    return (<Action action={action} key={action.actionID} handleVote={handleVote} />)
   });
   return (
-    <table className="full-width table table-striped">
+    <table className="panel-body full-width table table-striped">
       <tbody>
         {actionNode}
       </tbody>
@@ -122,13 +126,19 @@ export default class App extends React.Component {
     this.ethAddress = ""
 
     // Load Ethereum jazz;
-    let provider = new Web3.providers.HttpProvider(`http://${TESTRPC_HOST}:${TESTRPC_PORT}`)
+    if (typeof web3 !== 'undefined') {
+      // Use Mist/MetaMask's provider
+      this.web3 = new Web3(web3.currentProvider);
+    } else {
+      // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
+      this.web3 = new Web3(new Web3.providers.HttpProvider(`http://${TESTRPC_HOST}:${TESTRPC_PORT}`));
+    }
 
-    this.web3 = new Web3()
-    this.web3.setProvider(provider)
-    this.meta = contract(EntropyContract)
-    this.meta.setProvider(provider)
-    this.meta.deployed().then((instance) => {
+    this.entropy = contract(EntropyContract)
+    this.entropy.setProvider(this.web3.currentProvider)
+
+    // this.entropy.at("0x511b3f037be295ccb60efe956878305b138fa5a4").then((instance) => {
+    this.entropy.deployed().then((instance) => {
       this.state.ethAddress = instance.address
       this.state.contract = instance
       this.state.web3 = this.web3
@@ -142,7 +152,7 @@ export default class App extends React.Component {
       // Clean up data
       var data = bigNumberToString(data)
 
-      this.meta.deployed().then((instance) =>
+      this.entropy.deployed().then((instance) =>
       {
         var action_id = data.actionID
 
@@ -150,12 +160,10 @@ export default class App extends React.Component {
         instance.actions(action_id).then( (action_data) => {
           var actions = this.state.actions.slice()
           var action_data = bigNumberToString(action_data)
-          console.log(action_data)
-
 
           var action = {
             actionID: parseInt(action_id),
-            eth: action_data[0],
+            eth: this.state.web3.fromWei(action_data[0], 'ether'),
             description: action_data[1],
             tags: action_data[2],
             votingDeadline: new Date(parseInt(action_data[3]) * 1000),
@@ -169,28 +177,23 @@ export default class App extends React.Component {
           // Set React state
 
           // If we already track this action
+          var found = false
           if(actions.length > 0)
           {
             for (var i in actions) {
               if(actions[i].actionID == action_id)
               {
                 // Update this action
-                console.log("updating action")
                 actions[i] = action
-              }
-              else
-              {
-                // otherwise create
-                console.log("creating action")
-                actions.push(action)
+                found = true
+                break
               }
             }
           }
-          else
+          if(! found)
           {
             actions.push(action)
           }
-
 
           this.setState({ actions: actions })
         })
@@ -198,7 +201,7 @@ export default class App extends React.Component {
     };
 
     // fetch actions from Ethereum
-    this.meta.deployed().then((instance) =>
+    this.entropy.deployed().then((instance) =>
     {
       var new_actions = instance.allEvents({ address: [instance.address], fromBlock: 0, toBlock: "latest" });
 
@@ -220,7 +223,7 @@ export default class App extends React.Component {
     // Assemble data
     const action = {
       description: val,
-      eth: eth,
+      eth: this.state.web3.toWei(eth, 'ether'),
       tags: tags,
       id: window.id++
     }
@@ -234,6 +237,11 @@ export default class App extends React.Component {
         gas: 200000
       })
   }
+
+  handleVote(id, vote) {
+    alert(id)
+  }
+
 
   // Handle remove
   handleRemove(id) {
@@ -290,9 +298,7 @@ export default class App extends React.Component {
                 <div className="fa fa-gear fa-2x text-muted"/>
               </h3>
               <div className="clearfix"/></div>
-            <div className="panel-body">
-              <ActionList actions={this.state.data} />
-            </div>
+            <ActionList actions={this.state.data} />
           </div>
         </div>
 
@@ -304,9 +310,9 @@ export default class App extends React.Component {
 
               </h1>
               <div className="clearfix"/></div>
-            <div className="panel-body">
-              <ActionList actions={this.state.actions} />
+            <ActionList actions={this.state.actions} />
 
+            <div className="panel-body">
               <ActionForm addaction={this.addaction.bind(this)}/>
             </div>
           </div>
